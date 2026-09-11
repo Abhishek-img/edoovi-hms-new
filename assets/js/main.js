@@ -1,0 +1,1130 @@
+// Immediate Theme Check/Apply to avoid layout shifts as early as possible
+if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+
+// Initialize Lucide Icons
+lucide.createIcons();
+
+// Mobile Navigation Menu Toggle
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileNav = document.getElementById('mobile-nav');
+
+if (mobileMenuBtn && mobileNav) {
+  mobileMenuBtn.addEventListener('click', () => {
+    mobileNav.classList.toggle('hidden');
+    const isHidden = mobileNav.classList.contains('hidden');
+    mobileMenuBtn.setAttribute('aria-expanded', (!isHidden).toString());
+    const menuIcon = document.getElementById('menu-icon');
+    if (menuIcon) {
+      menuIcon.setAttribute('data-lucide', isHidden ? 'menu' : 'x');
+    }
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  });
+
+  // Close mobile nav when clicking a link
+  mobileNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+      const menuIcon = document.getElementById('menu-icon');
+      if (menuIcon) {
+        menuIcon.setAttribute('data-lucide', 'menu');
+      }
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  });
+
+  // Mobile Sub-menu Accordion Toggle
+  mobileNav.querySelectorAll('.mobile-dropdown button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parent = btn.parentElement;
+      const submenu = parent.querySelector('.mobile-submenu');
+      
+      // Close other mobile submenus
+      mobileNav.querySelectorAll('.mobile-dropdown').forEach(item => {
+        if (item !== parent) {
+          const otherSub = item.querySelector('.mobile-submenu');
+          if (otherSub) otherSub.classList.add('hidden');
+          const otherChevron = item.querySelector('[data-lucide="chevron-down"]');
+          if (otherChevron) {
+            otherChevron.style.transform = 'rotate(0deg)';
+          }
+        }
+      });
+
+      if (submenu) {
+        submenu.classList.toggle('hidden');
+        const isClosed = submenu.classList.contains('hidden');
+        const chevron = btn.querySelector('[data-lucide="chevron-down"]');
+        if (chevron) {
+          chevron.style.transform = isClosed ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+      }
+    });
+  });
+}
+
+// Scroll-triggered navbar compact state
+const mainNavbar = document.getElementById('main-navbar');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 40) {
+    mainNavbar.classList.add('scrolled');
+  } else {
+    mainNavbar.classList.remove('scrolled');
+  }
+}, { passive: true });
+
+// 1. Core HMS Modules Switcher Content Database (Strictly Aligned with PDF Document)
+const modulesData = {
+  'tab-dashboard': {
+    title: 'Dashboard Overview',
+    desc: 'Provides a real-time overview of hospital operations through KPIs, revenue, patient flow and alerts.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: "Today's OPD/IPD", desc: 'Live monitoring of outpatient visits and inpatient occupancy.' },
+      { name: 'Revenue', desc: 'Real-time billing, collections, and financial analytics.' },
+      { name: 'Bed Occupancy', desc: 'Visual ward grid showing occupied, available, and reserved beds.' },
+      { name: 'Doctor Availability', desc: 'Roster management, active consults, and shift tracking.' },
+      { name: 'Analytics', desc: 'Operational performance insights and hospital KPIs.' }
+    ]
+  },
+  'tab-registration': {
+    title: 'Patient Registration',
+    desc: 'Creates a unique UHID and maintains complete electronic patient records for future visits.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'UHID', desc: 'Unique Health Identifier generated for every registered patient.' },
+      { name: 'Demographics', desc: 'Comprehensive personal, guardian, and emergency contact details.' },
+      { name: 'Insurance', desc: 'Payer profiles, policy details, and TPA coverage mapping.' },
+      { name: 'Documents', desc: 'Digital upload and storage of ID proofs, consents, and files.' },
+      { name: 'History', desc: 'Complete historical timeline of visits, diagnoses, and treatments.' }
+    ]
+  },
+  'tab-appointments': {
+    title: 'Appointment Management',
+    desc: 'Manages doctor schedules, online booking, walk-ins and reminders.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Booking', desc: 'Multi-channel appointment booking via web, app, or desk.' },
+      { name: 'Queue', desc: 'Live patient OPD queue management and wait-time tracking.' },
+      { name: 'Token', desc: 'Automated token generation for walk-ins and appointments.' },
+      { name: 'Reschedule', desc: 'Flexible slot updates and doctor schedule adjustments.' },
+      { name: 'Reminders', desc: 'Automated SMS/WhatsApp appointment notification alerts.' }
+    ]
+  },
+  'tab-opd': {
+    title: 'OPD Management',
+    desc: 'Handles outpatient consultation, diagnosis, prescription and follow-up.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Consultation', desc: 'Doctor clinical notes, chief complaints, and examination logs.' },
+      { name: 'Vitals', desc: 'Capture temperature, BP, pulse, weight, and SPO2.' },
+      { name: 'Prescription', desc: 'Digital e-prescriptions with drug dosage and frequency.' },
+      { name: 'Diagnosis', desc: 'ICD-10 clinical coding and diagnostic note recording.' },
+      { name: 'Follow-up', desc: 'Schedule follow-up visit dates and return instructions.' }
+    ]
+  },
+  'tab-ipd': {
+    title: 'IPD Management',
+    desc: 'Manages admission to discharge including beds, nursing and billing.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Admission', desc: 'Seamless inpatient admission workflow and deposit tracking.' },
+      { name: 'Bed', desc: 'Ward & bed allocation, transfers, and status updates.' },
+      { name: 'Rounds', desc: 'Daily doctor visit notes and treatment updates.' },
+      { name: 'Nursing', desc: 'Medication administration logs and vitals charts.' },
+      { name: 'Discharge', desc: 'Discharge summary generation and clearance approval.' }
+    ]
+  },
+  'tab-pharmacy': {
+    title: 'Pharmacy',
+    desc: 'Controls medicine inventory, purchases and dispensing.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Purchase', desc: 'Purchase orders, vendor management, and stock inward.' },
+      { name: 'Stock', desc: 'Real-time medicine inventory tracking and batch management.' },
+      { name: 'Expiry', desc: 'Automated expiry date alerts and slow-moving drug tracking.' },
+      { name: 'Billing', desc: 'Point-of-sale pharmacy billing synced with OPD/IPD.' },
+      { name: 'Returns', desc: 'Sales returns, batch adjustments, and discard logs.' }
+    ]
+  },
+  'tab-laboratory': {
+    title: 'Laboratory',
+    desc: 'Automates pathology workflow from sample collection to reports.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Tests', desc: 'Comprehensive diagnostic test master and package catalog.' },
+      { name: 'Samples', desc: 'Sample collection, barcode tagging, and lab routing.' },
+      { name: 'Results', desc: 'Parameter result entry with reference range indicators.' },
+      { name: 'Approval', desc: 'Pathologist verification and digital signature sign-off.' },
+      { name: 'Reports', desc: 'Instant PDF report generation and WhatsApp dispatch.' }
+    ]
+  },
+  'tab-billing': {
+    title: 'Billing',
+    desc: 'Centralized billing for all departments with taxes and payments.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'OPD/IPD', desc: 'Unified billing for consultations, bed charges, and procedures.' },
+      { name: 'Lab', desc: 'Pathology and radiology test charge aggregation.' },
+      { name: 'Pharmacy', desc: 'Integrated medicine charges rolled into final invoice.' },
+      { name: 'Discount', desc: 'Corporate, insurance, and concession management.' },
+      { name: 'Receipts', desc: 'Multi-mode payment receipts, advances, and refunds.' }
+    ]
+  },
+  'tab-reports': {
+    title: 'Reports & Analytics',
+    desc: 'Generates operational, clinical and financial reports.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Revenue', desc: 'Daily, monthly, and departmental revenue breakdown.' },
+      { name: 'Patient', desc: 'Footfall, demographics, and retention reports.' },
+      { name: 'Doctor', desc: 'Consultation count, OPD/IPD revenue contribution.' },
+      { name: 'Inventory', desc: 'Stock valuation, fast-moving items, and reorder alerts.' },
+      { name: 'Exports', desc: 'Export all reports to Excel, PDF, and CSV formats.' }
+    ]
+  },
+  'tab-superadmin': {
+    title: 'Super Admin (SaaS)',
+    desc: 'Central management of multiple hospitals, subscriptions and modules.',
+    benefits: 'Improves operational efficiency, reduces manual work, increases accuracy, and provides better visibility for hospital management.',
+    features: [
+      { name: 'Hospitals', desc: 'Multi-branch & multi-hospital tenant onboard management.' },
+      { name: 'Packages', desc: 'Subscription tier configuration and feature bundling.' },
+      { name: 'Permissions', desc: 'Role-based access controls (RBAC) and user rights.' },
+      { name: 'Monitoring', desc: 'System health logs, audit trails, and usage metrics.' },
+      { name: 'Licenses', desc: 'Software license keys, expiration, and renewal tracking.' }
+    ]
+  }
+};
+
+const moduleStats = {
+  'tab-dashboard': [
+    { name: "OPD/IPD Activity", sub: "Today's IPD", value: "256", pct: 75, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Revenue Audit", sub: "Today's Target", value: "₹3.45L", pct: 60, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Bed Occupancy", sub: "Total Wards", value: "82%", pct: 82, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Doctor Availability", sub: "On Standby", value: "18", pct: 90, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-registration': [
+    { name: "UHID Gen", sub: "Active Patient Base", value: "1.2K", pct: 85, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Demographics", sub: "Profile Completeness", value: "100%", pct: 100, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Insurance", sub: "TPA Approvals", value: "45", pct: 65, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Documents", sub: "EHR Sync Rate", value: "98%", pct: 98, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-appointments': [
+    { name: "Daily Bookings", sub: "Rescheduled slots", value: "142", pct: 80, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "OPD Queue", sub: "Avg Wait: 12 min", value: "12m", pct: 40, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Active Tokens", sub: "Checked in", value: "85", pct: 70, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Reminders Sent", sub: "No-show Alert Sync", value: "99%", pct: 99, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-opd': [
+    { name: "Consultations", sub: "E-Prescriptions", value: "110", pct: 75, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Vitals Tracked", sub: "Triaged Patients", value: "100%", pct: 100, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Digital Rx", sub: "MIMS Drug Checked", value: "95%", pct: 95, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "ICD-10 Mapped", sub: "Clinical Diagnosis", value: "92%", pct: 92, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-ipd': [
+    { name: "Admissions", sub: "Pending Clearances", value: "32", pct: 60, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Bed Allocations", sub: "Ward Transfers", value: "88%", pct: 88, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Doctor Rounds", sub: "Clinical Updates", value: "24/24", pct: 100, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Nursing Shift Logs", sub: "Vitals Recorded", value: "97%", pct: 97, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-pharmacy': [
+    { name: "Medicine Inward", sub: "Vendor Orders", value: "85%", pct: 85, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Inventory Tracked", sub: "Item Batches", value: "12K+", pct: 90, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Expiry Warnings", sub: "Discarded Stock", value: "0", pct: 100, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Synced Bills", sub: "IPD/OPD Orders", value: "100%", pct: 100, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-laboratory': [
+    { name: "Tests Cataloged", sub: "Packages Configured", value: "450", pct: 95, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Samples Routed", sub: "Barcode Tagged", value: "100%", pct: 100, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Result Verification", sub: "Pathologist Signoff", value: "94%", pct: 94, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "WhatsApp Dispatched", sub: "PDF Report Sync", value: "99%", pct: 99, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-billing': [
+    { name: "Unified Bills", sub: "Agreed Tariff sync", value: "100%", pct: 100, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "TPA Claims", sub: "Real-time Audited", value: "96%", pct: 96, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Discount Clearance", sub: "Admin Approvals", value: "12", pct: 50, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Digital Payments", sub: "Refund Actions", value: "88%", pct: 88, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-reports': [
+    { name: "Revenue Audits", sub: "Daily Accounts Book", value: "100%", pct: 100, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Patient Flow", sub: "Demographic Trends", value: "Live", pct: 100, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "Doctor Insights", sub: "OPD load tracking", value: "Synced", pct: 100, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "Stock Valuations", sub: "Low stock alerts", value: "Safe", pct: 95, color: 'text-indigo-600 dark:text-indigo-400' }
+  ],
+  'tab-superadmin': [
+    { name: "Active Tenancies", sub: "Branches Syncing", value: "4", pct: 80, color: 'text-brand-600 dark:text-emerald-450' },
+    { name: "Package Tier Bills", sub: "License Keys", value: "Synced", pct: 100, color: 'text-emerald-600 dark:text-teal-400' },
+    { name: "RBAC Permissions", sub: "Audit Trails", value: "100%", pct: 100, color: 'text-cyan-600 dark:text-cyan-400' },
+    { name: "System Uptime SLA", sub: "Node health status", value: "99.9%", pct: 99, color: 'text-indigo-600 dark:text-indigo-400' }
+  ]
+};
+
+function switchModule(tabId) {
+  // Toggle button highlights
+  document.querySelectorAll('.module-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const selectedBtn = document.getElementById('btn-' + tabId);
+  if (selectedBtn) {
+    selectedBtn.classList.add('active');
+  }
+
+  // Fetch content
+  const data = modulesData[tabId];
+  if (!data) return;
+  const container = document.getElementById('module-display-content');
+  // Build premium circular progress dials HTML dynamically
+  let dialsHtml = '';
+  const stats = moduleStats[tabId] || [];
+  stats.forEach(s => {
+    const strokeDash = Math.round(s.pct);
+    dialsHtml += `
+      <div class="bg-slate-50/60 dark:bg-slate-900/40 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-xs">
+        <span class="text-[9px] font-black text-slate-450 dark:text-slate-300 uppercase tracking-widest mb-3">${s.name}</span>
+        <div class="relative w-20 h-20 flex items-center justify-center mb-3">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+            <path class="text-slate-100 dark:text-slate-850" stroke-width="2.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <path class="${s.color}" stroke-width="2.5" stroke-dasharray="${strokeDash}, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          </svg>
+          <div class="absolute text-center">
+            <span class="text-base font-black text-slate-850 dark:text-white">${s.value}</span>
+          </div>
+        </div>
+        <div class="space-y-0.5">
+          <p class="text-[10px] font-bold text-slate-800 dark:text-white">${s.name}</p>
+          <p class="text-[8px] text-slate-400 dark:text-slate-300 font-medium">${s.sub}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  // Update inner HTML of detail container
+  container.innerHTML = `
+    <div class="space-y-6">
+      <!-- Module title row -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center space-x-1.5 text-[0.625rem] font-bold text-brand-600 dark:text-[#10b981] tracking-widest uppercase bg-brand-50 dark:bg-slate-800 border border-brand-100 dark:border-slate-700 px-3 py-1 rounded-full mb-3">
+            <i data-lucide="layers" class="w-3 h-3"></i>
+            <span>Module Detail</span>
+          </span>
+          <h3 class="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 dark:text-white leading-tight">${data.title}</h3>
+        </div>
+        <div class="flex-shrink-0">
+          <div class="inline-flex items-center space-x-1.5 bg-brand-50 dark:bg-emerald-950/30 border border-brand-100 dark:border-emerald-800 px-3.5 py-1.5 rounded-xl shadow-xs">
+            <i data-lucide="check-circle" class="w-4 h-4 text-brand-650 dark:text-emerald-400"></i>
+            <span class="text-xs font-black text-brand-700 dark:text-[#10b981]">Active</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-650 dark:text-slate-200 text-sm sm:text-base leading-relaxed">${data.desc}</p>
+
+      <!-- Premium Circular Status Dials (matching screenshot) -->
+      <div>
+        <h5 class="text-[0.625rem] font-black uppercase tracking-widest text-slate-450 dark:text-slate-300 mb-6 flex items-center space-x-3">
+          <span class="flex-1 h-px bg-slate-200/60 dark:bg-slate-800/80"></span>
+          <span>Key System Features</span>
+          <span class="flex-1 h-px bg-slate-200/60 dark:bg-slate-800/80"></span>
+        </h5>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          ${dialsHtml}
+        </div>
+      </div>
+
+      <!-- Business Benefit / Impact Banner with dynamic bar chart (matching screenshot) -->
+      <div class="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50/50 border border-brand-100 dark:from-slate-800 dark:to-slate-800/50 dark:border-slate-700">
+        <div class="flex items-start space-x-4">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/25">
+            <i data-lucide="trending-up" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h6 class="text-[0.625rem] font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider">Business Impact</h6>
+            <p class="text-xs text-brand-850 dark:text-slate-200 mt-0.5 leading-relaxed">${data.benefits}</p>
+          </div>
+        </div>
+        <!-- Floating mini dynamic bar chart -->
+        <div class="hidden sm:flex items-end gap-1.5 h-12 shrink-0 pr-2">
+          <div class="w-2 h-5 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs opacity-60"></div>
+          <div class="w-2 h-8 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs opacity-80"></div>
+          <div class="w-2 h-11 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs"></div>
+          <div class="w-2 h-6 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs opacity-75"></div>
+          <div class="w-2 h-9 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs opacity-90"></div>
+          <div class="w-2 h-12 bg-gradient-to-t from-brand-600 to-teal-400 rounded-t-xs"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Reinitialize Lucide icons inside dynamic container
+  lucide.createIcons();
+}
+
+let activeAISimulator = 'ai-reminder';
+
+function toggleAISandbox(aiId) {
+  document.querySelectorAll('.ai-tab-btn').forEach(btn => {
+    btn.classList.remove('active', 'bg-[#4f46e5]', 'bg-brand-600', 'dark:bg-[#10b981]', 'text-white', 'shadow-xs');
+    btn.classList.add('text-slate-650', 'dark:text-slate-300');
+  });
+  const selectedBtn = document.getElementById('btn-' + aiId);
+  if (selectedBtn) {
+    selectedBtn.classList.add('active', 'bg-brand-600', 'dark:bg-[#10b981]', 'text-white', 'shadow-xs');
+    selectedBtn.classList.remove('text-slate-650', 'dark:text-slate-300');
+  }
+
+  activeAISimulator = aiId;
+  
+  document.querySelectorAll('.ai-sandbox-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  const selectedContent = document.getElementById('sandbox-' + aiId);
+  if (selectedContent) {
+    selectedContent.classList.remove('hidden');
+  }
+}
+
+function rerunAISimulation() {
+  const output = document.getElementById('ai-sandbox-output');
+  output.innerHTML = '<span class="text-slate-500">// Processing secure query...</span>';
+  setTimeout(() => {
+    output.innerHTML = aiSimulations[activeAISimulator];
+  }, 600);
+}
+
+// 3. Interactive ROI Savings Calculator logic
+const opdSlider = document.getElementById('opd-slider');
+const bedsSlider = document.getElementById('beds-slider');
+
+const opdValue = document.getElementById('opd-value');
+const bedsValue = document.getElementById('beds-value');
+
+const savingsDisplay = document.getElementById('savings-display');
+const hoursDisplay = document.getElementById('hours-display');
+
+function calculateSavings() {
+  if (!opdSlider || !bedsSlider || !opdValue || !bedsValue || !savingsDisplay || !hoursDisplay) return;
+  const opd = parseInt(opdSlider.value);
+  const beds = parseInt(bedsSlider.value);
+
+  // Display active values
+  opdValue.textContent = opd;
+  bedsValue.textContent = beds + " Beds";
+
+  // Calculate monthly savings
+  const noShowSavings = opd * 30 * 2;
+  const billingErrorsSavings = beds * 30 * 0.75 * 10;
+  const totalSavings = noShowSavings + billingErrorsSavings;
+
+  // Staff Hours Saved:
+  const registrationHoursSaved = opd * 30 * 0.05; 
+  const dischargeHoursSaved = (beds * 1.5) * 0.5;
+  const totalHours = Math.round(registrationHoursSaved + dischargeHoursSaved);
+
+  // Format displays
+  savingsDisplay.textContent = "$" + totalSavings.toLocaleString('en-US');
+  hoursDisplay.textContent = totalHours.toLocaleString('en-US') + " Hours";
+}
+
+if (opdSlider && bedsSlider) {
+  opdSlider.addEventListener('input', calculateSavings);
+  bedsSlider.addEventListener('input', calculateSavings);
+  // Run initial calculation
+  calculateSavings();
+}
+
+// 4. Demo Submit Handler
+function handleDemoRequest(event) {
+  event.preventDefault();
+  
+  const nameInput = document.getElementById('demo-name');
+  const emailInput = document.getElementById('demo-email');
+  const phoneInput = document.getElementById('demo-phone');
+  const hospitalInput = document.getElementById('demo-hospital');
+  const agreeInput = document.getElementById('demo-agree');
+  
+  const errorName = document.getElementById('error-name');
+  const errorEmail = document.getElementById('error-email');
+  const errorPhone = document.getElementById('error-phone');
+  const errorHospital = document.getElementById('error-hospital');
+  const errorAgree = document.getElementById('error-agree');
+  const demoStatus = document.getElementById('demo-status');
+  
+  // Reset error displays
+  errorName.classList.add('hidden');
+  errorName.textContent = '';
+  errorEmail.classList.add('hidden');
+  errorEmail.textContent = '';
+  errorPhone.classList.add('hidden');
+  errorPhone.textContent = '';
+  errorHospital.classList.add('hidden');
+  errorHospital.textContent = '';
+  errorAgree.classList.add('hidden');
+  errorAgree.textContent = '';
+  demoStatus.classList.add('hidden');
+  
+  nameInput.classList.remove('border-rose-500');
+  emailInput.classList.remove('border-rose-500');
+  phoneInput.classList.remove('border-rose-500');
+  hospitalInput.classList.remove('border-rose-500');
+  
+  let isValid = true;
+  
+  // Validate Full Name
+  const nameVal = nameInput.value.trim();
+  if (!nameVal) {
+    errorName.textContent = 'Name is required.';
+    errorName.classList.remove('hidden');
+    nameInput.classList.add('border-rose-500');
+    isValid = false;
+  } else if (nameVal.length < 2) {
+    errorName.textContent = 'Name must be at least 2 characters.';
+    errorName.classList.remove('hidden');
+    nameInput.classList.add('border-rose-500');
+    isValid = false;
+  }
+
+  // Validate Email
+  const emailVal = emailInput.value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailVal) {
+    errorEmail.textContent = 'Email address is required.';
+    errorEmail.classList.remove('hidden');
+    emailInput.classList.add('border-rose-500');
+    isValid = false;
+  } else if (!emailRegex.test(emailVal)) {
+    errorEmail.textContent = 'Please enter a valid work email address.';
+    errorEmail.classList.remove('hidden');
+    emailInput.classList.add('border-rose-500');
+    isValid = false;
+  }
+
+  // Validate Phone
+  const phoneVal = phoneInput.value.trim();
+  if (!phoneVal) {
+    errorPhone.textContent = 'Phone number is required.';
+    errorPhone.classList.remove('hidden');
+    phoneInput.classList.add('border-rose-500');
+    isValid = false;
+  } else if (phoneInput.iti) {
+    if (!phoneInput.iti.isValidNumber()) {
+      errorPhone.textContent = 'Please enter a valid phone number for selected country.';
+      errorPhone.classList.remove('hidden');
+      phoneInput.classList.add('border-rose-500');
+      isValid = false;
+    }
+  } else {
+    // fallback basic regex
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phoneVal.replace(/\s+/g, ''))) {
+      errorPhone.textContent = 'Please enter a valid 10-digit phone number.';
+      errorPhone.classList.remove('hidden');
+      phoneInput.classList.add('border-rose-500');
+      isValid = false;
+    }
+  }
+  
+  // Validate Hospital/Clinic Name
+  const hospitalVal = hospitalInput.value.trim();
+  if (!hospitalVal) {
+    errorHospital.textContent = 'Hospital or Clinic name is required.';
+    errorHospital.classList.remove('hidden');
+    hospitalInput.classList.add('border-rose-500');
+    isValid = false;
+  } else if (hospitalVal.length < 3) {
+    errorHospital.textContent = 'Name must be at least 3 characters long.';
+    errorHospital.classList.remove('hidden');
+    hospitalInput.classList.add('border-rose-500');
+    isValid = false;
+  }
+
+  // Validate Consent Agreement
+  if (!agreeInput.checked) {
+    errorAgree.textContent = 'You must agree to the privacy policy to proceed.';
+    errorAgree.classList.remove('hidden');
+    isValid = false;
+  }
+  
+  if (isValid) {
+    demoStatus.classList.remove('hidden');
+    event.target.reset();
+    
+    // Reset custom select dropdown representations
+    document.querySelectorAll('.custom-select-container').forEach(container => {
+      const input = container.querySelector('input[type="hidden"]');
+      const span = container.querySelector('.selected-value');
+      if (input) input.value = '';
+      if (span) {
+        if (container.id === 'custom-select-beds-container') {
+          span.textContent = 'Select capacity...';
+        } else {
+          span.textContent = 'Select specialty...';
+        }
+        span.classList.remove('text-slate-950', 'dark:text-white');
+        span.classList.add('text-slate-400');
+      }
+    });
+
+    setTimeout(() => {
+      demoStatus.classList.add('hidden');
+    }, 5000);
+  }
+}
+
+// 5. Creative FAQ Accordion controller
+function toggleFaq(button) {
+  const faqItem = button.closest('.faq-item');
+  const answer = faqItem.querySelector('.faq-answer');
+  const icon = button.querySelector('[data-lucide="chevron-down"]');
+  const isOpen = faqItem.classList.contains('active');
+
+  // Close all other FAQs for single expansion behaviour
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.classList.remove('active', 'border-brand-300', 'shadow-md');
+    item.querySelector('.faq-answer').style.maxHeight = '0px';
+    const otherIcon = item.querySelector('[data-lucide="chevron-down"]');
+    if (otherIcon) {
+      otherIcon.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  if (!isOpen) {
+    faqItem.classList.add('active', 'border-brand-300', 'shadow-md');
+    answer.style.maxHeight = answer.scrollHeight + 'px';
+    if (icon) {
+      icon.style.transform = 'rotate(180deg)';
+    }
+  }
+}
+
+// Pre-open first FAQ item on load
+window.addEventListener('DOMContentLoaded', () => {
+  const firstFaqBtn = document.querySelector('.faq-item button');
+  if (firstFaqBtn) {
+    setTimeout(() => {
+      firstFaqBtn.click();
+    }, 150);
+  }
+});
+
+// Initialize Swiper Slider for AI Suite Cards (1 slide on mobile, 4 on desktop)
+const initApp = () => {
+  if (typeof Swiper !== 'undefined') {
+    new Swiper('.ai-cards-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 20,
+      loop: true,
+      autoplay: {
+        delay: 3500,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 1.5,
+          spaceBetween: 16,
+        },
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 24,
+        },
+        1280: {
+          slidesPerView: 4,
+          spaceBetween: 24,
+        },
+      },
+    });
+
+    // Initialize Swiper Slider for Workflow Step Cards
+    new Swiper('.workflow-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 16,
+      loop: true,
+      autoplay: {
+        delay: 4000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.workflow-swiper .swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.workflow-next',
+        prevEl: '.workflow-prev',
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 1.5,
+          spaceBetween: 16,
+        },
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 24,
+        },
+        1280: {
+          slidesPerView: 4,
+          spaceBetween: 24,
+        },
+      },
+    });
+
+    // Initialize Swiper Slider for Hospital Testimonials
+    if (document.querySelector('.testimonials-swiper')) {
+      new Swiper('.testimonials-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 24,
+        loop: true,
+        autoplay: {
+          delay: 4500,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.testimonials-swiper .swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.testimonial-next',
+          prevEl: '.testimonial-prev',
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 1,
+            spaceBetween: 20,
+          },
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 24,
+          },
+          1024: {
+            slidesPerView: 3,
+            spaceBetween: 28,
+          },
+        },
+      });
+    }
+
+    // Odometer scroll-triggered counting logic for HMS Impact section
+    const odometers = document.querySelectorAll('.impact-odometer');
+    if (odometers.length > 0) {
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const target = entry.target;
+            const targetStr = target.getAttribute('data-target');
+            const endVal = parseFloat(targetStr);
+            const duration = 1500;
+            const startTime = performance.now();
+            const hasDecimal = targetStr.includes('.');
+
+            const card = target.closest('.group');
+            const waveMover = card ? card.querySelector('.wave-mover') : null;
+
+            function updateCount(timestamp) {
+              const progress = Math.min((timestamp - startTime) / duration, 1);
+              let currentVal = progress * endVal;
+              if (hasDecimal) {
+                target.textContent = currentVal.toFixed(1);
+              } else {
+                target.textContent = Math.floor(currentVal);
+              }
+
+              // Animate wave height in sync with counter
+              if (waveMover) {
+                waveMover.style.setProperty('--value', currentVal.toString());
+              }
+
+              if (progress < 1) {
+                requestAnimationFrame(updateCount);
+              } else {
+                target.textContent = targetStr;
+                if (waveMover) {
+                  waveMover.style.setProperty('--value', targetStr);
+                }
+              }
+            }
+            requestAnimationFrame(updateCount);
+            observer.unobserve(target);
+          }
+        });
+      }, { threshold: 0.05 });
+
+      odometers.forEach(od => observer.observe(od));
+    }
+  }
+};
+
+if (document.readyState !== 'loading') {
+  initApp();
+} else {
+  document.addEventListener('DOMContentLoaded', initApp);
+}
+
+// 4. Dark Mode Toggle Logic
+function initDarkMode() {
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+  const darkModeToggleMobile = document.getElementById('dark-mode-toggle-mobile');
+
+  // Apply dark mode on initial load if previously selected
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+
+  function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+  }
+  if (darkModeToggleMobile) {
+    darkModeToggleMobile.addEventListener('click', toggleDarkMode);
+  }
+
+  // Inject Tailwind Dark Mode Classes dynamically on load
+  function injectTailwindDarkClasses() {
+    // 1. Sections
+    document.querySelectorAll("section").forEach(sec => {
+      sec.classList.add("dark:bg-[#090d16]", "dark:text-slate-100");
+    });
+    const impact = document.getElementById("hms-impact");
+    if (impact) {
+      impact.classList.add("dark:bg-[#050811]");
+    }
+    
+    // 2. Footer
+    document.querySelectorAll("footer").forEach(foot => {
+      foot.classList.add("dark:bg-[#050811]", "dark:text-slate-200");
+    });
+
+    // 3. Cards & Mockups
+    document.querySelectorAll(".bg-white, .bg-white\\/90, .bg-white\\/95, .bg-white\\/80, .hover-glow-card").forEach(el => {
+      el.classList.add("dark:bg-slate-900", "dark:border-slate-800", "dark:from-slate-900", "dark:via-slate-900", "dark:to-slate-900");
+    });
+
+    // 4. Nested cards & blocks
+    document.querySelectorAll(".bg-slate-50, .bg-slate-100, [class*='bg-slate-50'], [class*='bg-slate-100']").forEach(el => {
+      el.classList.add("dark:bg-slate-800", "dark:border-slate-700");
+    });
+
+    // 5. Header Titles
+    document.querySelectorAll(".text-slate-900, .text-slate-800").forEach(el => {
+      el.classList.add("dark:text-white");
+    });
+
+    // 6. Paragraphs & descriptions
+    document.querySelectorAll(".text-slate-700, .text-slate-600, .text-slate-505, .text-slate-500, .text-slate-650").forEach(el => {
+      el.classList.add("dark:text-slate-300");
+    });
+
+    // 7. Badge & Pill variants
+    document.querySelectorAll("[class*='bg-brand-50'], [class*='bg-tealAccent-50'], [class*='bg-purple-50'], [class*='bg-amber-50'], [class*='bg-teal-50'], [class*='bg-emerald-50'], [class*='bg-blue-50'], [class*='bg-cyan-50'], [class*='bg-sky-50'], [class*='bg-rose-50']").forEach(el => {
+      el.classList.add("dark:bg-slate-800", "dark:border-slate-700");
+    });
+
+    // 8. Sidebar tab buttons hover/active selectors
+    document.querySelectorAll('.module-tab-btn').forEach(btn => {
+      btn.classList.add("dark:bg-slate-900/40", "dark:border-slate-800/80", "dark:hover:lg:bg-slate-800", "dark:group-[.active]:bg-slate-900");
+    });
+
+    // 9. FAQ border
+    document.querySelectorAll('.faq-item').forEach(el => {
+      el.classList.add("dark:border-slate-800", "dark:bg-slate-900");
+    });
+
+    // 10. Card watermarks & Progress Bar tracks/fills
+    document.querySelectorAll(".text-slate-100.text-6xl").forEach(el => {
+      el.classList.add("dark:text-slate-800");
+    });
+    document.querySelectorAll(".w-full.h-1\\.5, .h-1\\.5").forEach(el => {
+      el.classList.add("dark:bg-slate-800");
+      const fill = el.querySelector("div");
+      if (fill) {
+        fill.classList.add("dark:bg-[#10b981]");
+      }
+    });
+  }
+
+  // Run class injection
+  if (document.readyState !== 'loading') {
+    injectTailwindDarkClasses();
+  } else {
+    document.addEventListener('DOMContentLoaded', injectTailwindDarkClasses);
+  }
+
+  // Apply scrolled state styling on initial load if scrolled
+  if (mainNavbar && window.scrollY > 40) {
+    mainNavbar.classList.add('scrolled');
+  }
+}
+initDarkMode();
+
+// Initialize AOS (Animate on Scroll) - only on desktop (lg screens)
+if (typeof AOS !== 'undefined') {
+  // Inject data-aos attributes dynamically to sections
+  document.querySelectorAll('section').forEach((sec) => {
+    if (!sec.hasAttribute('data-aos')) {
+      sec.setAttribute('data-aos', 'fade-up');
+    }
+  });
+
+  // Inject data-aos and staggered delays dynamically to feature cards
+  document.querySelectorAll('.hover-glow-card, .bg-white.border.rounded-3xl, .grid > div').forEach((card, idx) => {
+    if (!card.hasAttribute('data-aos')) {
+      card.setAttribute('data-aos', 'fade-up');
+      card.setAttribute('data-aos-delay', ((idx % 3) * 100).toString());
+    }
+  });
+
+  AOS.init({
+    duration: 800,
+    easing: 'ease-in-out',
+    once: true,
+    mirror: false,
+    disable: function() {
+      return window.innerWidth < 1024;
+    }
+  });
+}
+function switchTelemetryTab(tabId, imgSrc, titleText) {
+  document.querySelectorAll('.telemetry-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  const activeBtn = document.getElementById('btn-' + tabId);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }
+
+  // Update center mockup image and title
+  const imgElement = document.getElementById('telemetry-display-image');
+  const titleElement = document.getElementById('telemetry-display-title');
+  
+  if (imgElement) {
+    imgElement.style.opacity = '0';
+    setTimeout(() => {
+      imgElement.src = imgSrc;
+      imgElement.style.opacity = '1';
+    }, 150);
+  }
+  
+  if (titleElement) {
+    titleElement.textContent = titleText;
+  }
+}
+
+// ═══ Initialize Hospital Logos Marquee Swiper ═══
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Swiper !== 'undefined' && document.querySelector('.hospital-logos-swiper')) {
+    new Swiper('.hospital-logos-swiper', {
+      slidesPerView: 'auto',
+      spaceBetween: 40,
+      loop: true,
+      speed: 4000,
+      allowTouchMove: false,
+      autoplay: {
+        delay: 0,
+        disableOnInteraction: false,
+      },
+    });
+  }
+
+  // ═══ Initialize Hero Slider Swiper ═══
+  if (typeof Swiper !== 'undefined' && document.querySelector('.hero-swiper')) {
+    new Swiper('.hero-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 30,
+      loop: true,
+      speed: 800,
+      effect: 'slide',
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.hero-swiper-section .swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.hero-swiper-section .hero-next',
+        prevEl: '.hero-swiper-section .hero-prev',
+      },
+    });
+  }
+});
+
+// ═══ Initialize Pricing Toggle & FAQs ═══
+document.addEventListener('DOMContentLoaded', () => {
+  const billingToggle = document.getElementById('billing-toggle');
+  const toggleIndicator = document.getElementById('toggle-indicator');
+  const monthlyLabel = document.getElementById('monthly-label');
+  const annualLabel = document.getElementById('annual-label');
+  const priceValues = document.querySelectorAll('.price-value');
+  const billingTexts = document.querySelectorAll('.billing-text');
+
+  let isAnnual = true; // default to annual as structured in HTML
+
+  function updateBillingCycle() {
+    if (isAnnual) {
+      toggleIndicator.classList.remove('translate-x-0');
+      toggleIndicator.classList.add('translate-x-6');
+      annualLabel.className = 'text-xs sm:text-sm font-bold text-slate-900 dark:text-white';
+      monthlyLabel.className = 'text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400';
+      
+      priceValues.forEach(el => {
+        el.textContent = el.getAttribute('data-annual');
+      });
+      if (billingTexts.length >= 2) {
+        billingTexts[0].textContent = 'Billed annually ($1,908/yr)';
+        billingTexts[1].textContent = 'Billed annually ($4,788/yr)';
+      }
+    } else {
+      toggleIndicator.classList.remove('translate-x-6');
+      toggleIndicator.classList.add('translate-x-0');
+      monthlyLabel.className = 'text-xs sm:text-sm font-bold text-slate-900 dark:text-white';
+      annualLabel.className = 'text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400';
+
+      priceValues.forEach(el => {
+        el.textContent = el.getAttribute('data-monthly');
+      });
+      if (billingTexts.length >= 2) {
+        billingTexts[0].textContent = 'Billed monthly ($199/mo)';
+        billingTexts[1].textContent = 'Billed monthly ($499/mo)';
+      }
+    }
+  }
+
+  if (billingToggle) {
+    // Initial call to ensure classes are aligned
+    updateBillingCycle();
+    
+    billingToggle.addEventListener('click', () => {
+      isAnnual = !isAnnual;
+      updateBillingCycle();
+    });
+  }
+
+  // FAQ Accordion
+  const faqBtns = document.querySelectorAll('.faq-btn');
+  faqBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const content = item.querySelector('.faq-content');
+      const icon = item.querySelector('.faq-icon');
+      
+      // Close other FAQs
+      document.querySelectorAll('.faq-item').forEach(otherItem => {
+        if (otherItem !== item) {
+          const otherContent = otherItem.querySelector('.faq-content');
+          const otherIcon = otherItem.querySelector('.faq-icon');
+          otherContent.style.maxHeight = null;
+          otherIcon.classList.remove('rotate-180');
+          otherItem.classList.remove('border-brand-500', 'dark:border-brand-500');
+        }
+      });
+
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        icon.classList.remove('rotate-180');
+        item.classList.remove('border-brand-500', 'dark:border-brand-500');
+      } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        icon.classList.add('rotate-180');
+        item.classList.add('border-brand-500', 'dark:border-brand-500');
+      }
+    });
+  });
+});
+
+// Initialize intl-tel-input flag and Custom dropdown selects
+document.addEventListener('DOMContentLoaded', () => {
+  const phoneInput = document.getElementById('demo-phone');
+  let itiInstance = null;
+  if (phoneInput && typeof window.intlTelInput !== 'undefined') {
+    itiInstance = window.intlTelInput(phoneInput, {
+      initialCountry: 'in',
+      separateDialCode: true,
+      utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.4/build/js/utils.js',
+    });
+    // Bind the instance to the DOM element
+    phoneInput.iti = itiInstance;
+  }
+
+  // Custom Dropdown select list logic
+  document.querySelectorAll('.custom-select-container').forEach(container => {
+    const btn = container.querySelector('button');
+    const optionsDiv = container.querySelector('.custom-select-options');
+    const input = container.querySelector('input[type="hidden"]');
+    const span = container.querySelector('.selected-value');
+    const chevron = container.querySelector('.select-chevron');
+    
+    if (btn && optionsDiv) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Close all other open custom select options first
+        document.querySelectorAll('.custom-select-options').forEach(opt => {
+          if (opt !== optionsDiv) {
+            opt.classList.add('hidden');
+            const otherChevron = opt.previousElementSibling.previousElementSibling.querySelector('.select-chevron');
+            if (otherChevron) otherChevron.classList.remove('rotate-180');
+          }
+        });
+        
+        optionsDiv.classList.toggle('hidden');
+        if (chevron) chevron.classList.toggle('rotate-180');
+      });
+      
+      optionsDiv.querySelectorAll('[data-value]').forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = option.getAttribute('data-value');
+          const text = option.textContent;
+          if (input) input.value = val;
+          if (span) {
+            span.textContent = text;
+            span.classList.remove('text-slate-400');
+            span.classList.add('text-slate-950', 'dark:text-white');
+          }
+          optionsDiv.classList.add('hidden');
+          if (chevron) chevron.classList.remove('rotate-180');
+        });
+      });
+    }
+  });
+  
+  // Global click listener to collapse open custom dropdowns on clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.custom-select-options').forEach(opt => {
+      opt.classList.add('hidden');
+      const chevron = opt.previousElementSibling.previousElementSibling.querySelector('.select-chevron');
+      if (chevron) chevron.classList.remove('rotate-180');
+    });
+  });
+});
+
+

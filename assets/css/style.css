@@ -1,0 +1,450 @@
+/* Premium Healthcare Typography (Manrope for crisp corporate headings, Plus Jakarta Sans for clean modern body readability) */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* Base Styles & Custom Font Families */
+:root {
+  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #fafafa;
+  color: #0f172a;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+h1{
+  line-height: 1.1 !important;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Micro-animations for high-fidelity interface design elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+/* Webkit Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+
+/* Footer ECG / heartbeat line animation */
+@keyframes ecg-draw {
+  0%   { stroke-dashoffset: 400; opacity: 0.3; }
+  40%  { stroke-dashoffset: 0;   opacity: 1; }
+  70%  { stroke-dashoffset: 0;   opacity: 1; }
+  100% { stroke-dashoffset: -400; opacity: 0.3; }
+}
+.ecg-path {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: ecg-draw 3.5s ease-in-out infinite;
+}
+
+/* Pure-CSS vertical ticker for activity logs */
+@keyframes ticker-scroll {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.ticker-wrap {
+  overflow: hidden;
+  height: 80px;
+}
+.ticker-inner {
+  animation: ticker-scroll 10s linear infinite;
+}
+.ticker-inner:hover {
+  animation-play-state: paused;
+}
+
+/* Footer top gradient border */
+.footer-border-top {
+  border-top: 2px solid transparent;
+  background-image: linear-gradient(white, white),
+    linear-gradient(90deg, #4f46e5 0%, #14b8a6 50%, #4f46e5 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Stat counter shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #4f46e5 0%, #14b8a6 40%, #4f46e5 80%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+
+/* Nav Pill Styles for new header */
+.nav-pill {
+  position: relative;
+  letter-spacing: -0.01em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scroll-triggered navbar compact state (added via JS) */
+#main-navbar.scrolled {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  background-color: rgba(255, 255, 255, 0.94);
+  border-color: rgba(226, 232, 240, 0.8);
+}
+.dark #main-navbar.scrolled {
+  background-color: rgba(15, 23, 42, 0.94);
+  border-color: rgba(30, 41, 59, 0.8);
+}
+.dark footer {
+  background-image: none !important;
+  background-color: #050811 !important;
+}
+
+
+/* Shimmer button text animation */
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+
+
+/* Waving Liquid Animation for HMS Impact Section */
+@keyframes waveMoveHorizontal {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-360px); }
+}
+@keyframes waveMoveHorizontalRev {
+  0% { transform: translateX(-360px); }
+  100% { transform: translateX(0); }
+}
+.wave-animation-1 {
+  animation: waveMoveHorizontal 3s linear infinite;
+}
+.wave-animation-2 {
+  animation: waveMoveHorizontalRev 4.5s linear infinite;
+  opacity: 0.6;
+}
+
+/* Dynamic wave height controller based on --value percentage */
+.wave-mover {
+  transform: translateY(calc(130px - (1.3px * var(--value, 0))));
+  transition: transform 1.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Instagram Hover Brand Gradient */
+.hover-instagram:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+  border-color: transparent !important;
+}
+
+/* Creative & Advanced Hover Effects specifically for desktop (lg screens: 1024px and up) */
+@media (min-width: 1024px) {
+  /* 1. Creative Scale and Gradient border shadow for Glow Cards */
+  .hover-glow-card {
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .hover-glow-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 60px -15px rgba(79, 70, 229, 0.18), 0 0 30px -5px rgba(20, 184, 166, 0.1);
+  }
+  
+  html.dark .hover-glow-card:hover {
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.8), 0 0 35px -5px rgba(99, 102, 241, 0.15);
+  }
+
+  /* 2. Interactive navigation pill hover line reveal */
+  .nav-pill {
+    position: relative;
+  }
+  .nav-pill::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #14b8a6);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-50%);
+  }
+  .nav-pill:hover::after {
+    width: 80%;
+  }
+/* 3. Book a demo button pulse/glow movement sweep */
+}
+
+
+
+
+
+@keyframes bulletPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.25;
+  }
+}
+
+
+/* Ensure primary brand green text becomes a bright, highly readable emerald green in dark mode headings/spans */
+html.dark .text-brand-600,
+html.dark .text-\[\#0b6b5f\] {
+  color: #10b981 !important;
+}
+
+/* Prevent CTA bullet separator dots from turning dark in dark mode */
+html.dark .rounded-full.bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Redesign Creative Background Floating Blob Animations */
+@keyframes blob-float-slow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.15);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes blob-float-reverse {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 40px) scale(0.9);
+  }
+  66% {
+    transform: translate(30px, -20px) scale(1.1);
+  }
+}
+
+.animate-blob-1 {
+  animation: blob-float-slow 20s infinite ease-in-out;
+}
+.animate-blob-2 {
+  animation: blob-float-reverse 25s infinite ease-in-out;
+}
+.animate-blob-3 {
+  animation: blob-float-slow 22s infinite ease-in-out 3s;
+}
+
+/* Single solid brand color */
+.text-gradient-brand {
+  color: #0b6b5f;
+}
+html.dark .text-gradient-brand {
+  color: #10b981;
+}
+
+
+/* intl-tel-input dark theme custom styles */
+.iti {
+  width: 100%;
+}
+
+.iti__dropdown-content,
+.iti__country-list {
+  background-color: #090d16 !important;
+  /* Deep dark slate-950 */
+  border: 1px solid #1e293b !important;
+  /* border-slate-800 */
+  border-radius: 0.85rem !important;
+  color: #f8fafc !important;
+  /* text-slate-50 */
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5) !important;
+  padding: 6px !important;
+  font-family: sans-serif;
+}
+
+.iti__country {
+  padding: 10px 14px !important;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.iti__country:hover,
+.iti__country.iti__highlight {
+  background-color: #1e293b !important;
+  /* hover:bg-slate-800 */
+}
+
+.iti__selected-flag {
+  border-radius: 0.75rem 0 0 0.75rem;
+  background-color: transparent !important;
+  padding-left: 14px !important;
+}
+
+.iti__selected-flag:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.iti__selected-dial-code {
+  color: #cbd5e1 !important;
+  /* text-slate-300 */
+  font-size: 0.875rem !important;
+  font-weight: 600;
+  margin-left: 6px !important;
+}
+
+.iti__country-name {
+  color: #94a3b8 !important;
+  /* text-slate-400 */
+  font-size: 0.8125rem !important;
+}
+
+.iti__dial-code {
+  color: #64748b !important;
+  /* text-slate-500 */
+  font-size: 0.8125rem !important;
+}
+
+.iti__arrow {
+  border-top-color: #64748b !important;
+}
+
+.iti__arrow--up {
+  border-bottom-color: #64748b !important;
+}
+
+/* Country list search bar styling override */
+.iti__search-input {
+  background-color: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.5rem !important;
+  padding: 10px 14px !important;
+  outline: none !important;
+  margin: 8px !important;
+  width: calc(100% - 16px) !important;
+  font-size: 0.8125rem !important;
+}
+
+.iti__search-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 1px #10b981 !important;
+}
+
+/* Form Fields Styling Enhancements */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="tel"],
+html.dark textarea,
+html.dark .custom-select-container button {
+  background-color: #090d16 !important;
+  border-color: #1e293b !important;
+  transition: all 0.3s ease !important;
+}
+
+input:focus,
+textarea:focus,
+.custom-select-container button:focus-visible,
+.custom-select-container button.border-brand-500 {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.12) !important;
+}
+
+/* Custom Select scrollbars */
+.custom-select-options::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-select-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-select-options::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+/* Force all section headings (excluding small subtitle headers and hero h1s) to be uniform on mobile view */
+@media (max-width: 767px) {
+  h2:not(.text-xs):not(.text-sm):not(.text-base) {
+    font-size: 1.625rem !important; /* Consistent 26px rendering */
+    line-height: 1.25 !important;
+  }
+}
+
+/* Adjust rounded-full capsule badge tags dynamically on small screens to prevent text wrap */
+@media (max-width: 640px) {
+  .inline-flex.rounded-full {
+    font-size: 0.65rem !important; /* Shrink font to ~10px */
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  .inline-flex.rounded-full span {
+    font-size: 0.65rem !important;
+  }
+}
+
+
+
+
+
+
